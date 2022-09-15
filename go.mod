@@ -1,4 +1,4 @@
-module github.com/eriicafes/goctl
+module github.com/eriicafes/swapenv
 
 go 1.18
 
