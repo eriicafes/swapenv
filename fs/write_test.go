@@ -29,7 +29,7 @@ func TestCopyFile(t *testing.T){
 func TestWriteFileContents(t *testing.T) {
 	target := "../example/.env.write"
 	WriteFileContents(target, "hello=world")
-	got := ReadFileContents(target)
+	got := string(ReadFileContents(target))
 	want := "hello=world"
 
 	if got != want {

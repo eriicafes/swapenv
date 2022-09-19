@@ -13,23 +13,21 @@ func Exists(path string) bool {
 	return true
 }
 
-func ReadFileContents(path string) string {
+func ReadFileContents(path string) []byte {
 	bytes, err := os.ReadFile(path);
 	if err != nil {
     		log.Fatal(err);
 	}
-	fileText := string(bytes[:]); // fileText is "Hello World!"
-	return fileText
+	return bytes
 }
 
 
 func GetDirectoryContents(dir string) []string {
 	entries, err := os.ReadDir(dir);
 	if err != nil {
-		log.Fatal(err);
+		// log.Fatal(err);
 		// Return empty slice
-		// names := make([]string, 0)
-		// return names
+		return make([]string, 0)
 	}
 
 	// Create a slice to hold the names of the files

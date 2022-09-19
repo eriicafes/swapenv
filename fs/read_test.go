@@ -27,7 +27,7 @@ func TestExistsFalse(t *testing.T){
 
 func TestReadFileContents(t *testing.T) {
     target := "../example/.env.hello"
-    got := ReadFileContents(target)
+    got := string(ReadFileContents(target))
     want := "hello=world"
 
     if got != want {
