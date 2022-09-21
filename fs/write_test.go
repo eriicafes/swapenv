@@ -1,73 +1,25 @@
 package fs
 
-import "testing"
+import (
+	"testing"
+)
 
+// Write writes data to a file named by filename
+func TestWrite(t *testing.T) {
+	target := "./example/.env.write"
+	data := []byte("hello=world")
+	n, err := Write(target, data)
+	
 
-func TestCreateFile(t *testing.T) {
-	target := "../example/.env.create"
-	CreateFile(target)
-	got := Exists(target)
-	want := true
-
-	if got != want {
-		t.Errorf("got %t, wanted %t", got, want)
+	if err != nil {
+		t.Error(err)
 	}
-	RemoveFile(target)
-}
 
-func TestCopyFile(t *testing.T){
-	target := "../example/.env.copy"
-	got := CopyFile("../example/.env.exists", target)
-	var want error = nil
+	
 
-	if got != want {
-		t.Errorf("got %v, wanted %v", got, want)
+	if n != len(data) {
+		t.Errorf("Write %d bytes, expected %d bytes", n, len(data))
 	}
-	RemoveFile(target)
-}
-
-func TestWriteFileContents(t *testing.T) {
-	target := "../example/.env.write"
-	WriteFileContents(target, "hello=world")
-	got := string(ReadFileContents(target))
-	want := "hello=world"
-
-	if got != want {
-		t.Errorf("got %v, wanted %v", got, want)
-	}
-	RemoveFile(target)
-}
-
-func TestRemoveFile(t *testing.T) {
-	target := "../example/.env.remove"
-	CreateFile(target)
-	got := RemoveFile(target)
-	var want error = nil
-
-	if got != want {
-		t.Errorf("got %v, wanted %v", got, want)
-	}
-}
 
 
-func TestRemoveDirectory(t *testing.T) {
-	target := "../exist"
-	MakeDir(target)
-	got := RemoveDir(target)
-	var want error = nil
-
-	if got != want {
-		t.Errorf("got %v, wanted %v", got, want)
-	}
-}
-
-func TestMakeDir(t *testing.T) {
-	target := "../example/make"
-	got := MakeDir(target)
-	var want error = nil
-
-	if got != want {
-		t.Errorf("got %v, wanted %v", got, want)
-	}
-	RemoveDir(target)
 }

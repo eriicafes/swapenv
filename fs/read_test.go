@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -25,24 +24,18 @@ func TestExistsFalse(t *testing.T){
     }
 }
 
-func TestReadFileContents(t *testing.T) {
+func TestRead(t *testing.T) {
     target := "../example/.env.hello"
-    got := string(ReadFileContents(target))
-    want := "hello=world"
+    check := []byte("hello=world")
 
-    if got != want {
-        t.Errorf("got %v, wanted %v", got, want)
-    }
-}
+    n, err := Read(target)
 
-func TestGetDirectoryContents(t *testing.T) {
-    target := "../example"
-    got := GetDirectoryContents(target)
-    // want := []string{".env.exists", ".env.hello"}
-    // print got
-    fmt.Println(got)
-    // Check the length of the got slice
-    if len(got) != 3 {
-        t.Errorf("got %v, wanted %v", got, 3)
+    if err != nil {
+        t.Error(err)
     }
+
+    if len(n) != len(check) {
+        t.Errorf("Read %d bytes, expected %d bytes", len(n), len(check))
+    }
+
 }
