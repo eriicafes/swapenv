@@ -13,14 +13,14 @@ func openFileRead(path string) (*os.File, error) {
 
 // Open file in file path with read-write access. File will be created if it does not exist.
 func openFileWrite(path string) (*os.File, error) {
-	return openFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, true)
+	return openFile(path, os.O_RDWR|os.O_CREATE, true)
 }
 
 // Open file in file path with provided flags. File will be created if it does not exist and createOnNotExist is true.
 func openFile(path string, flag int, createOnNotExist bool) (*os.File, error) {
 	// attempt to open file
 	// os.O_RDWR flag allows read-write access to file
-	// os.O_APPEND flag appends to file when writing
+	// os.O_RDONLY flag opens file with read only access
 	// os.O_CREATE flag creates file if it does not exist
 	file, err := os.OpenFile(path, flag, os.ModePerm)
 
