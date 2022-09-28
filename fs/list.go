@@ -6,32 +6,33 @@ import (
 	"strings"
 )
 
-
-
+// List all env files in directory and sub directories
 func List(dir string) ([]string, error) {
-	// List the files in a directory using filepath.Walk
-	// Change dir to absolute path
-	dir, err := filepath.Abs(dir)
-	if err != nil {
-		return nil, err
-	}
 	files := []string{}
-	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
+		// operate only on files
 		if !info.IsDir() {
-			// Remove the directory from the path
-			base := strings.TrimPrefix(path, dir)
-			filename := filepath.Base(path)
-			prefix := filepath.Dir(base)
-			if strings.HasPrefix(filename, ".env.") {
-				files = append(files, filepath.Join(prefix[1:],strings.TrimPrefix(filename, ".env.")))
+			// get relative path to dir
+			path, err = filepath.Rel(dir, path)
+
+			// ignore error in getting relative path
+			if err != nil {
+				return nil
+			}
+
+			// check if file has .env. prefix
+			if strings.HasPrefix(filepath.Base(path), ".env.") {
+				files = append(files, FormatPath(path))
 			}
 		}
-		
+
 		return nil
 	})
+
 	return files, err
 }
