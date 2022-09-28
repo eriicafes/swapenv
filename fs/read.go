@@ -1,17 +1,9 @@
 package fs
 
 import (
-	"os"
+	"errors"
+	"io"
 )
-
-func Exists(path string) bool {
-	_, err := os.Stat(path)
-	if err != nil {
-		return !os.IsNotExist(err)
-	}
-	return true
-}
-
 func Read(path string) ([]byte, error) {
 	
 	file, err := openFileRead(path);
@@ -28,7 +20,10 @@ func Read(path string) ([]byte, error) {
 	for {
 		n, err := file.Read(buffer)
 		if err != nil {
-			break
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return bytes, err
 		}
 		bytes = append(bytes, buffer[:n]...)
 	}

@@ -1,10 +1,13 @@
 package fs
 
-func Write(path string, data []byte) (int, error) {
+func Write(path string, data []byte) error {
 	file, err := openFileWrite(path)
+
 	if err != nil {
-		return 0, err
+		return err
 	}
+	
 	defer file.Close()
-	return file.Write(data)
+	_, err = file.Write(data)
+	return err
 }
