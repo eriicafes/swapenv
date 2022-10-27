@@ -11,9 +11,11 @@ import (
 // eg. `swapenv create test -b prod`
 
 // flags
-var (
-	base string
-)
+type CreateFlags struct {
+	Base string
+}
+
+var createFlags = CreateFlags{}
 
 // args
 type CreateArgs struct {
@@ -37,12 +39,12 @@ var createCmd = &cobra.Command{
 	Args:  createArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
 
-		fmt.Println("create env", createArgs.Fields.Name, "from", base)
+		fmt.Println("create env", createArgs.Fields.Name, "from", createFlags.Base)
 	},
 }
 
 func init() {
-	createCmd.Flags().StringVarP(&base, "base", "b", "", "optional env preset to base env file")
+	createCmd.Flags().StringVarP(&createFlags.Base, "base", "b", "", "optional env preset to base env file")
 
 	rootCmd.AddCommand(createCmd)
 }

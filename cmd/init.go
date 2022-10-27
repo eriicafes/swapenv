@@ -10,9 +10,11 @@ import (
 // eg. `swapenv init --dir envs`
 
 // flags
-var (
-	dir string
-)
+type InitFlags struct {
+	Dir string
+}
+
+var initFlags = InitFlags{}
 
 var initCmd = &cobra.Command{
 	Use:   "init",
@@ -20,12 +22,12 @@ var initCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 
-		fmt.Println("creating base env file")
+		fmt.Println("creating base env file in", initFlags.Dir)
 	},
 }
 
 func init() {
-	initCmd.Flags().StringVar(&dir, "dir", "", "directory to store env files")
+	initCmd.Flags().StringVar(&initFlags.Dir, "dir", "", "directory to store env files")
 
 	rootCmd.AddCommand(initCmd)
 }
