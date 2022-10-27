@@ -1,15 +1,15 @@
-package utils
+package args
 
 import "github.com/spf13/cobra"
 
 type args[T any] struct {
-	parser func(cmd *cobra.Command, args []string) (T, error)
-	Fields T
+	validator func(cmd *cobra.Command, args []string) (T, error)
+	Fields    T
 }
 
 // Cobra Positional Args function
 func (a *args[T]) Validate(cmd *cobra.Command, rawArgs []string) error {
-	fields, err := a.parser(cmd, rawArgs)
+	fields, err := a.validator(cmd, rawArgs)
 
 	if err != nil {
 		return err
@@ -20,9 +20,9 @@ func (a *args[T]) Validate(cmd *cobra.Command, rawArgs []string) error {
 	return nil
 }
 
-// Create new Args
-func ParseArgs[T any](parser func(cmd *cobra.Command, rawArgs []string) (T, error)) args[T] {
+// Create new args object with fields and validator
+func NewArgs[T any](validator func(cmd *cobra.Command, rawArgs []string) (T, error)) args[T] {
 	return args[T]{
-		parser: parser,
+		validator: validator,
 	}
 }

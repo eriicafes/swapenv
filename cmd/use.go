@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/eriicafes/swapenv/utils"
+	"github.com/eriicafes/swapenv/args"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ type UseArgs struct {
 	Preset string
 }
 
-var useArgs = utils.ParseArgs(func(cmd *cobra.Command, rawArgs []string) (args UseArgs, err error) {
+var useArgs = args.NewArgs(func(cmd *cobra.Command, rawArgs []string) (args UseArgs, err error) {
 	// accept only preset argument
 	if err = cobra.ExactArgs(1)(cmd, rawArgs); err != nil {
 		return args, err
