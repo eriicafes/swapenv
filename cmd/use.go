@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Swap env to an existing preset
+// Swap env to an existing env preset
 // eg. `swapenv use staging`
 
 // args
@@ -29,7 +29,7 @@ var useArgs = args.NewArgs(func(cmd *cobra.Command, rawArgs []string) (args UseA
 
 var useCmd = &cobra.Command{
 	Use:   "use preset",
-	Short: "Swap env to an existing preset",
+	Short: "Swap env to an existing env preset",
 	Args:  useArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
 		// ensure preset exists

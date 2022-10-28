@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Init project with base env file
+// Init project with base env preset
 // eg. `swapenv init -p test`
 
 // flags
