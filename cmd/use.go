@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/eriicafes/swapenv/args"
-	"github.com/eriicafes/swapenv/config"
+	"github.com/eriicafes/swapenv/presets"
 	"github.com/spf13/cobra"
 )
 
@@ -28,24 +28,18 @@ var useArgs = args.NewArgs(func(cmd *cobra.Command, rawArgs []string) (args UseA
 })
 
 var useCmd = &cobra.Command{
-	Use:   "use preset",
-	Short: "Swap env to an existing env preset",
-	Args:  useArgs.Validate,
+	Use:     "use preset",
+	Short:   "Swap env to an existing env preset",
+	Example: "swapenv use staging",
+	Args:    useArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// ensure preset exists
-
-		// write .env contents into current preset
-
-		// load target env preset into .env
-
-		fmt.Println("switching to preset", useArgs.Fields.Preset)
-
-		// update env preset
-		if err := config.SetEnvPreset(useArgs.Fields.Preset); err != nil {
+		// swap to selected preset
+		if err := presets.Swap(useArgs.Fields.Preset); err != nil {
 			fmt.Println(err)
 			return
 		}
 
+		fmt.Println("using env preset:", useArgs.Fields.Preset)
 	},
 }
 

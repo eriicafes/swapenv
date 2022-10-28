@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/eriicafes/swapenv/config"
+	"github.com/eriicafes/swapenv/presets"
 	"github.com/spf13/cobra"
 )
 
@@ -15,11 +16,16 @@ var syncCmd = &cobra.Command{
 	Short: "Manually sync current env preset with .env file",
 	Long: `Manually sync current env preset with .env file.
 This command is not required to be called as syncing is always done before changing env presets`,
-	Args: cobra.NoArgs,
+	Example: "swapenv sync",
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// write .env contents into current preset
+		// commit .env contents into current preset
+		if err := presets.Commit(); err != nil {
+			fmt.Println(err)
+			return
+		}
 
-		fmt.Println("synced", config.Env.Preset, "with .env file")
+		fmt.Println("synced:", config.Env.Preset, "with .env file")
 	},
 }
 

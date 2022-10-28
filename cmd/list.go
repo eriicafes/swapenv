@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eriicafes/swapenv/config"
+	"github.com/eriicafes/swapenv/presets"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
 // List all env presets
-// eg. `swapenv list`
+// eg. `swapenv ls -i`
 
 type ListFlags struct {
 	Interactive bool
@@ -22,9 +22,10 @@ var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List all env presets",
+	Example: "swapenv ls -i",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
-		envs := []string{"dev", "test", "staging", "prod"}
+		envs := presets.List()
 
 		// simply list all env presets in non-interactive mode
 		if !listFlags.Interactive {
@@ -39,17 +40,13 @@ var listCmd = &cobra.Command{
 			return
 		}
 
-		// write .env contents into current preset
-
-		// load target env preset into .env
-
-		fmt.Println("selected env preset:", preset)
-
-		// update env preset
-		if err = config.SetEnvPreset(preset); err != nil {
+		// swap to selected preset
+		if err = presets.Swap(preset); err != nil {
 			fmt.Println(err)
 			return
 		}
+
+		fmt.Println("using env preset:", preset)
 	},
 }
 

@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/eriicafes/swapenv/args"
-	"github.com/eriicafes/swapenv/config"
+	"github.com/eriicafes/swapenv/presets"
 	"github.com/spf13/cobra"
 )
 
 // Create new env preset
-// eg. `swapenv create test -u -b prod`
+// eg. `swapenv create staging -u -b prod`
 
 // flags
 type CreateFlags struct {
@@ -36,32 +36,39 @@ var createArgs = args.NewArgs(func(cmd *cobra.Command, rawArgs []string) (args C
 })
 
 var createCmd = &cobra.Command{
-	Use:   "create preset",
-	Short: "Create new env preset",
-	Args:  createArgs.Validate,
+	Use:     "create preset",
+	Short:   "Create new env preset",
+	Example: "swapenv create staging -u -b prod",
+	Args:    createArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// ensure base preset exists if provided
+		// create env preset
+		var err error
+		if createFlags.Base != "" {
+			// create preset from base
+			err = presets.CreateFrom(createArgs.Fields.Preset, createFlags.Base)
+		} else {
+			// create preset from .env file, creating it if it does not exist
+			err = presets.Create(createArgs.Fields.Preset)
+		}
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-		// create env preset (using optional base preset if provided), return error if it already exists
+		fmt.Println("created env preset:", createArgs.Fields.Preset, "from:", createFlags.Base)
 
-		fmt.Println("created env", createArgs.Fields.Preset, "from", createFlags.Base)
-
-		// proceed to use env preset if use flag was provided
+		// proceed to use preset if use flag was provided
 		if !createFlags.Use {
 			return
 		}
 
-		// write .env contents into current preset
-
-		// load newly created env preset into .env
-
-		fmt.Println("using", createArgs.Fields.Preset)
-
-		// update env preset
-		if err := config.SetEnvPreset(createArgs.Fields.Preset); err != nil {
+		// swap to newly created preset
+		if err = presets.Swap(createArgs.Fields.Preset); err != nil {
 			fmt.Println(err)
 			return
 		}
+
+		fmt.Println("using env preset:", createArgs.Fields.Preset)
 	},
 }
 

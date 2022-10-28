@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/eriicafes/swapenv/config"
+	"github.com/eriicafes/swapenv/presets"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -19,9 +20,10 @@ type InitFlags struct {
 var initFlags InitFlags
 
 var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Init project with base env preset",
-	Args:  cobra.NoArgs,
+	Use:     "init",
+	Short:   "Init project with base env preset",
+	Example: "swapenv init -p test",
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		// check if init has been run previously
 		if config.LoadedFromFile {
@@ -29,7 +31,7 @@ var initCmd = &cobra.Command{
 			return
 		}
 
-		// confirm init and get base env preset with prompt
+		// confirm init and get base preset with prompt
 		preset, err := promptInit(initFlags.Preset)
 		if err != nil {
 			fmt.Println(err)
@@ -37,16 +39,19 @@ var initCmd = &cobra.Command{
 		}
 
 		// create base env preset
+		// uses contents of .env file, creating it if it does not exist
+		if err = presets.Create(preset); err != nil {
+			fmt.Println(err)
+			return
+		}
 
-		// load newly created env preset into .env
+		// TODO: add env dir and .env to .gitignore if project is a git repository
 
-		// create swapenvcache config store file
-
-		// add env dir and .env to .gitignore if project is a git repository
-
-		fmt.Println("created base env preset:", ".env."+preset, "in: envs")
+		fmt.Println("created base env preset:", ".env."+preset, "in:", config.Base)
 
 		// update env preset
+		// we call this function directly because we do not want to repopulate the .env file (presets.LoadUnchecked does this) which already serves as the source of truth
+		// calling this function will also create the swapenvcache config file
 		if err = config.SetEnvPreset(preset); err != nil {
 			fmt.Println(err)
 			return
