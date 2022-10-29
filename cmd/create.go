@@ -50,10 +50,7 @@ var createCmd = &cobra.Command{
 			// create preset from .env file, creating it if it does not exist
 			err = presets.Create(createArgs.Fields.Preset)
 		}
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		cobra.CheckErr(err)
 
 		fmt.Println("created env preset:", createArgs.Fields.Preset, "from:", createFlags.Base)
 
@@ -64,8 +61,7 @@ var createCmd = &cobra.Command{
 
 		// swap to newly created preset
 		if err = presets.Swap(createArgs.Fields.Preset); err != nil {
-			fmt.Println(err)
-			return
+			cobra.CheckErr(err)
 		}
 
 		fmt.Println("using env preset:", createArgs.Fields.Preset)

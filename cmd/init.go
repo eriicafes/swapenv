@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/eriicafes/swapenv/config"
@@ -27,22 +28,18 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		// check if init has been run previously
 		if config.LoadedFromFile {
-			fmt.Println("swapenv has already been initialized on this project")
-			return
+			err := errors.New("swapenv has already been initialized on this project")
+			cobra.CheckErr(err)
 		}
 
 		// confirm init and get base preset with prompt
 		preset, err := promptInit(initFlags.Preset)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		cobra.CheckErr(err)
 
 		// create base env preset
 		// uses contents of .env file, creating it if it does not exist
 		if err = presets.Create(preset); err != nil {
-			fmt.Println(err)
-			return
+			cobra.CheckErr(err)
 		}
 
 		// TODO: add env dir and .env to .gitignore if project is a git repository
@@ -53,8 +50,7 @@ var initCmd = &cobra.Command{
 		// we call this function directly because we do not want to repopulate the .env file (presets.LoadUnchecked does this) which already serves as the source of truth
 		// calling this function will also create the swapenvcache config file
 		if err = config.SetEnvPreset(preset); err != nil {
-			fmt.Println(err)
-			return
+			cobra.CheckErr(err)
 		}
 	},
 }

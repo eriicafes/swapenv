@@ -21,8 +21,7 @@ This command is not required to be called as syncing is always done before chang
 	Run: func(cmd *cobra.Command, _ []string) {
 		// commit .env contents into current preset
 		if err := presets.Commit(); err != nil {
-			fmt.Println(err)
-			return
+			cobra.CheckErr(err)
 		}
 
 		fmt.Println("synced:", config.Env.Preset, "with .env file")

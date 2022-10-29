@@ -35,8 +35,7 @@ var useCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		// swap to selected preset
 		if err := presets.Swap(useArgs.Fields.Preset); err != nil {
-			fmt.Println(err)
-			return
+			cobra.CheckErr(err)
 		}
 
 		fmt.Println("using env preset:", useArgs.Fields.Preset)

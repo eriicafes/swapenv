@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +11,5 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	if rootCmd.Execute() != nil {
-		os.Exit(1)
-	}
+	cobra.CheckErr(rootCmd.Execute())
 }

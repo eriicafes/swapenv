@@ -35,15 +35,11 @@ var listCmd = &cobra.Command{
 
 		// select env with prompt
 		preset, err := promptSelectEnv(envs)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		cobra.CheckErr(err)
 
 		// swap to selected preset
 		if err = presets.Swap(preset); err != nil {
-			fmt.Println(err)
-			return
+			cobra.CheckErr(err)
 		}
 
 		fmt.Println("using env preset:", preset)
