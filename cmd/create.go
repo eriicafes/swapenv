@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/eriicafes/swapenv/args"
+	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
 	"github.com/spf13/cobra"
 )
@@ -41,6 +42,11 @@ var createCmd = &cobra.Command{
 	Example: "swapenv create staging -u -b prod",
 	Args:    createArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
+		// ensure init has been run previously
+		if err := config.EnsureHasInitialized(); err != nil {
+			cobra.CheckErr(err)
+		}
+
 		// create env preset
 		var err error
 		if createFlags.Base != "" {

@@ -2,8 +2,11 @@ package presets
 
 import (
 	"fmt"
+	"io"
+	"path"
 
 	"github.com/eriicafes/swapenv/config"
+	"github.com/eriicafes/swapenv/fs"
 )
 
 // Load preset to .env file.
@@ -14,7 +17,26 @@ func LoadUnchecked(preset string) error {
 		return fmt.Errorf("env preset '%v' does not exist", preset)
 	}
 
-	// TODO: write contents of preset to .env file
+	// get preset file handle
+	presetPath := path.Join(config.Base, fs.PathFromFormattedName(preset))
+	presetFile, err := fs.OpenFileRead(presetPath)
+	if err != nil {
+		return err
+	}
+	defer presetFile.Close()
+
+	// get env file handle
+	envFile, err := fs.OpenFileWrite(".env")
+	if err != nil {
+		return err
+	}
+	defer envFile.Close()
+
+	// copy preset into env
+	_, err = io.Copy(envFile, presetFile)
+	if err != nil {
+		return err
+	}
 
 	// update config
 	if err := config.SetEnvPreset(preset); err != nil {

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/eriicafes/swapenv/config"
@@ -26,9 +25,8 @@ var initCmd = &cobra.Command{
 	Example: "swapenv init -p test",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// check if init has been run previously
-		if config.LoadedFromFile {
-			err := errors.New("swapenv has already been initialized on this project")
+		// ensure init has not been run previously
+		if err := config.EnsureHasNotInitialized(); err != nil {
 			cobra.CheckErr(err)
 		}
 

@@ -28,9 +28,6 @@ func init() {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(getConfigPath())
 
-	// set default values
-	viper.SetDefault("env.preset", "local")
-
 	// read config file
 	if err := viper.ReadInConfig(); err != nil {
 		// reset config on error
