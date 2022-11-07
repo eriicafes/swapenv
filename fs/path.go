@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// Returns the formatted name string of env file.
-func FormatPath(path string) (filename string) {
+// Convert path to formatted name string.
+func PathToFormattedName(path string) (filename string) {
 	prefix, name := filepath.Split(path)
 
 	// remove .env. from file name
@@ -17,8 +17,8 @@ func FormatPath(path string) (filename string) {
 	return
 }
 
-// Returns the file path string of env file.
-func NormalizePath(filename string) (path string) {
+// Get path from formatted name string.
+func PathFromFormattedName(filename string) (path string) {
 	prefix, name := filepath.Split(filename)
 
 	// add .env. to file name

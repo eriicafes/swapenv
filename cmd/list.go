@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -25,6 +26,11 @@ var listCmd = &cobra.Command{
 	Example: "swapenv ls -i",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
+		// ensure init has been run previously
+		if err := config.EnsureHasInitialized(); err != nil {
+			cobra.CheckErr(err)
+		}
+
 		envs := presets.List()
 
 		// simply list all env presets in non-interactive mode

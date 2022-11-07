@@ -3,7 +3,7 @@ package fs
 import "testing"
 
 func TestOpenRead(t *testing.T) {
-	file, err := openFileRead("../example/.env.hello")
+	file, err := OpenFileRead("../example/.env.hello")
 
 	if err != nil {
 		t.Error("could not open file")
@@ -19,7 +19,7 @@ func TestOpenRead(t *testing.T) {
 }
 
 func TestOpenWrite(t *testing.T) {
-	file, err := openFileWrite("../example/.env.hello")
+	file, err := OpenFileWrite("../example/.env.hello")
 
 	if err != nil {
 		t.Error("could not open file")

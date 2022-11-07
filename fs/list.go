@@ -27,7 +27,7 @@ func List(dir string) ([]string, error) {
 
 			// check if file has .env. prefix
 			if strings.HasPrefix(filepath.Base(path), ".env.") {
-				files = append(files, FormatPath(path))
+				files = append(files, PathToFormattedName(path))
 			}
 		}
 

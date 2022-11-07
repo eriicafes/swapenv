@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/eriicafes/swapenv/args"
+	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
 	"github.com/spf13/cobra"
 )
@@ -33,6 +34,11 @@ var useCmd = &cobra.Command{
 	Example: "swapenv use staging",
 	Args:    useArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
+		// ensure init has been run previously
+		if err := config.EnsureHasInitialized(); err != nil {
+			cobra.CheckErr(err)
+		}
+
 		// swap to selected preset
 		if err := presets.Swap(useArgs.Fields.Preset); err != nil {
 			cobra.CheckErr(err)

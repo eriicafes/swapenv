@@ -1,6 +1,13 @@
 package presets
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"path"
+
+	"github.com/eriicafes/swapenv/config"
+	"github.com/eriicafes/swapenv/fs"
+)
 
 // Create preset using contents of .env file.
 //
@@ -11,9 +18,25 @@ func Create(preset string) error {
 		return fmt.Errorf("env preset '%v' already exists", preset)
 	}
 
-	// TODO: create preset and copy contents of .env file to preset, create the .env file if it does not exist
+	// get env file handle
+	envFile, err := fs.OpenFileReadCreate(".env")
+	if err != nil {
+		return err
+	}
+	defer envFile.Close()
 
-	return nil
+	// get preset file handle
+	presetPath := path.Join(config.Base, fs.PathFromFormattedName(preset))
+	presetFile, err := fs.OpenFileWrite(presetPath)
+	if err != nil {
+		return err
+	}
+	defer presetFile.Close()
+
+	// copy env into preset
+	_, err = io.Copy(presetFile, envFile)
+
+	return err
 }
 
 // Create preset using contents base preset.
@@ -28,6 +51,22 @@ func CreateFrom(preset string, base string) error {
 		return fmt.Errorf("base env preset '%v' does not exist", preset)
 	}
 
-	// TODO: create preset and copy contents of base preset to preset, return error if the base preset does not exist
-	return nil
+	// get src preset file handle
+	srcPresetPath := path.Join(config.Base, fs.PathFromFormattedName(base))
+	srcPresetFile, err := fs.OpenFileRead(srcPresetPath)
+	if err != nil {
+		return err
+	}
+
+	// get dest preset file handle
+	destPresetPath := path.Join(config.Base, fs.PathFromFormattedName(preset))
+	destPresetFile, err := fs.OpenFileWrite(destPresetPath)
+	if err != nil {
+		return err
+	}
+
+	// copy src preset into dest preset
+	_, err = io.Copy(destPresetFile, srcPresetFile)
+
+	return err
 }
