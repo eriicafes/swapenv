@@ -19,17 +19,14 @@ This command is not required to be called as syncing is always done before chang
 	Example: "swapenv sync",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// ensure init has been run previously
-		if err := config.EnsureHasInitialized(); err != nil {
-			cobra.CheckErr(err)
-		}
+		cfg := config.Get()
 
 		// commit .env contents into current preset
 		if err := presets.Commit(); err != nil {
 			cobra.CheckErr(err)
 		}
 
-		fmt.Println("synced:", config.Env.Preset, "with .env file")
+		fmt.Println("synced:", cfg.GetPreset(), "with .env file")
 	},
 }
 

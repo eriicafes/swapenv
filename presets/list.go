@@ -7,7 +7,9 @@ import (
 
 // List all presets.
 func List() []string {
-	files, _ := fs.List(config.Base)
+	cfg := config.Get()
+
+	files, _ := fs.List(cfg.Base())
 
 	return files
 }

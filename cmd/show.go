@@ -16,12 +16,9 @@ var showCmd = &cobra.Command{
 	Example: "swapenv show",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// ensure init has been run previously
-		if err := config.EnsureHasInitialized(); err != nil {
-			cobra.CheckErr(err)
-		}
+		cfg := config.Get()
 
-		fmt.Println(config.Env.Preset)
+		fmt.Println(cfg.GetPreset())
 	},
 }
 

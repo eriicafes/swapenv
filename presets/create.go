@@ -13,6 +13,8 @@ import (
 //
 // The .env file is created if it does not exist.
 func Create(preset string) error {
+	cfg := config.Get()
+
 	// return error if preset already exists
 	if Exists(preset) {
 		return fmt.Errorf("env preset '%v' already exists", preset)
@@ -26,7 +28,7 @@ func Create(preset string) error {
 	defer envFile.Close()
 
 	// get preset file handle
-	presetPath := path.Join(config.Base, fs.PathFromFormattedName(preset))
+	presetPath := path.Join(cfg.Base(), fs.PathFromFormattedName(preset))
 	presetFile, err := fs.OpenFileWrite(presetPath)
 	if err != nil {
 		return err
@@ -41,6 +43,8 @@ func Create(preset string) error {
 
 // Create preset using contents base preset.
 func CreateFrom(preset string, base string) error {
+	cfg := config.Get()
+
 	// return error if preset already exists
 	if Exists(preset) {
 		return fmt.Errorf("env preset '%v' already exists", preset)
@@ -48,18 +52,18 @@ func CreateFrom(preset string, base string) error {
 
 	// return error if base preset does not exist
 	if !Exists(base) {
-		return fmt.Errorf("base env preset '%v' does not exist", preset)
+		return fmt.Errorf("base env preset '%v' does not exist", base)
 	}
 
 	// get src preset file handle
-	srcPresetPath := path.Join(config.Base, fs.PathFromFormattedName(base))
+	srcPresetPath := path.Join(cfg.Base(), fs.PathFromFormattedName(base))
 	srcPresetFile, err := fs.OpenFileRead(srcPresetPath)
 	if err != nil {
 		return err
 	}
 
 	// get dest preset file handle
-	destPresetPath := path.Join(config.Base, fs.PathFromFormattedName(preset))
+	destPresetPath := path.Join(cfg.Base(), fs.PathFromFormattedName(preset))
 	destPresetFile, err := fs.OpenFileWrite(destPresetPath)
 	if err != nil {
 		return err

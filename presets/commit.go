@@ -10,6 +10,8 @@ import (
 
 // Commit .env file to current preset.
 func Commit() error {
+	cfg := config.Get()
+
 	// get env file handle
 	envFile, err := fs.OpenFileRead(".env")
 	if err != nil {
@@ -18,7 +20,7 @@ func Commit() error {
 	defer envFile.Close()
 
 	// get preset file handle
-	presetPath := path.Join(config.Base, fs.PathFromFormattedName(config.Env.Preset))
+	presetPath := path.Join(cfg.Base(), fs.PathFromFormattedName(cfg.GetPreset()))
 	presetFile, err := fs.OpenFileWrite(presetPath)
 	if err != nil {
 		return err

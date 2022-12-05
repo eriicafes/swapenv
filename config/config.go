@@ -1,42 +1,27 @@
 package config
 
 import (
-	"os"
-	"path"
-
-	"github.com/spf13/viper"
+	"errors"
 )
 
-// Config directory
-const Base = "env"
+var cfg = NewViperConfig(Getwd())
 
-// Config filename
-const Filename = ".swapenvcache.yaml"
-
-var Env env
-var LoadedFromFile bool
-
-func getConfigPath() string {
-	wd, _ := os.Getwd()
-
-	return path.Join(wd, Base)
+func Get() Config {
+	return cfg
 }
 
-func init() {
-	// configure viper
-	viper.SetConfigName(".swapenvcache")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(getConfigPath())
-
-	// read config file
-	if err := viper.ReadInConfig(); err != nil {
-		// reset config on error
-		viper.WriteConfig()
-	} else {
-		// set LoadedFromFile to true on successful read from file
-		LoadedFromFile = true
+// Ensure config has been initialized.
+func EnsureHasInit(c Config) error {
+	if c.HasInit() {
+		return nil
 	}
+	return errors.New("swapenv has not been initialized on this project, run `swapenv init`")
+}
 
-	// unmarshal into struct
-	viper.UnmarshalKey("env", &Env)
+// Ensure config has not been initialized.
+func EnsureHasNotInit(c Config) error {
+	if c.HasInit() {
+		return errors.New("swapenv has already been initialized on this project")
+	}
+	return nil
 }

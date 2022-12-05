@@ -26,16 +26,12 @@ var listCmd = &cobra.Command{
 	Example: "swapenv ls -i",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// ensure init has been run previously
-		if err := config.EnsureHasInitialized(); err != nil {
-			cobra.CheckErr(err)
-		}
-
+		cfg := config.Get()
 		envs := presets.List()
 
-		// simply list all env presets in non-interactive mode
+		// list all env presets in non-interactive mode
 		if !listFlags.Interactive {
-			fmt.Println(strings.Join(envs, "\n"))
+			listEnvs(envs, cfg.GetPreset())
 			return
 		}
 
@@ -50,6 +46,25 @@ var listCmd = &cobra.Command{
 
 		fmt.Println("using env preset:", preset)
 	},
+}
+
+func coloured(s string) string {
+	return "\033[36m" + s + "\033[0m"
+}
+
+func listEnvs(envs []string, preset string) {
+	fenvs := make([]string, 0, len(envs))
+
+	for _, env := range envs {
+		if env == preset {
+			env = coloured("* " + env)
+		} else {
+			env = "  " + env
+		}
+		fenvs = append(fenvs, env)
+	}
+
+	fmt.Println(strings.Join(fenvs, "\n"))
 }
 
 func promptSelectEnv(envs []string) (string, error) {

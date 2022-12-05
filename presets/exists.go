@@ -7,7 +7,9 @@ import (
 
 // Check if preset exists.
 func Exists(preset string) bool {
-	files, _ := fs.List(config.Base)
+	cfg := config.Get()
+
+	files, _ := fs.List(cfg.Base())
 
 	for _, file := range files {
 		if file == preset {
