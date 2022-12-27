@@ -6,11 +6,12 @@ import (
 
 var cfg = NewViperConfig(Getwd())
 
+// Get returns a pointer to the config singleton.
 func Get() Config {
 	return cfg
 }
 
-// Ensure config has been initialized.
+// EnsureHasInit checks if config has been initialized.
 func EnsureHasInit(c Config) error {
 	if c.HasInit() {
 		return nil
@@ -18,7 +19,7 @@ func EnsureHasInit(c Config) error {
 	return errors.New("swapenv has not been initialized on this project, run `swapenv init`")
 }
 
-// Ensure config has not been initialized.
+// EnsureHasNotInit checks if config has not been initialized.
 func EnsureHasNotInit(c Config) error {
 	if c.HasInit() {
 		return errors.New("swapenv has already been initialized on this project")

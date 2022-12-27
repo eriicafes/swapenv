@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/eriicafes/swapenv/config"
 	"github.com/spf13/cobra"
 )
@@ -14,10 +12,8 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cfg := config.Get()
 
-		_, command, _ := strings.Cut(cmd.CommandPath(), " ")
-
 		// ensure init has not been run before running `init` command
-		if command == "init" {
+		if cmd.Name() == "init" {
 			if err := config.EnsureHasNotInit(cfg); err != nil {
 				cobra.CheckErr(err)
 			}

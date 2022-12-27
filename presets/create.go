@@ -1,7 +1,6 @@
 package presets
 
 import (
-	"fmt"
 	"io"
 	"path"
 
@@ -12,15 +11,14 @@ import (
 // Create preset using contents of .env file.
 //
 // The .env file is created if it does not exist.
-func Create(preset string) error {
-	cfg := config.Get()
-
+// An error is returned if preset already exists.
+func Create(cfg config.Config, preset string) error {
 	// return error if preset already exists
-	if Exists(preset) {
-		return fmt.Errorf("env preset '%v' already exists", preset)
+	if Exists(cfg, preset) {
+		return &PresetAlreadyExists{preset: preset}
 	}
 
-	// get env file handle
+	// get .env file handle
 	envFile, err := fs.OpenFileReadCreate(".env")
 	if err != nil {
 		return err
@@ -28,7 +26,7 @@ func Create(preset string) error {
 	defer envFile.Close()
 
 	// get preset file handle
-	presetPath := path.Join(cfg.Base(), fs.PathFromFormattedName(preset))
+	presetPath := path.Join(cfg.Dir(), fs.PathFromFormattedName(preset))
 	presetFile, err := fs.OpenFileWrite(presetPath)
 	if err != nil {
 		return err
@@ -42,28 +40,28 @@ func Create(preset string) error {
 }
 
 // Create preset using contents base preset.
-func CreateFrom(preset string, base string) error {
-	cfg := config.Get()
-
+//
+// An error is returned if preset already exists or if base preset does not exist.
+func CreateFrom(cfg config.Config, preset string, base string) error {
 	// return error if preset already exists
-	if Exists(preset) {
-		return fmt.Errorf("env preset '%v' already exists", preset)
+	if Exists(cfg, preset) {
+		return &PresetAlreadyExists{preset: preset}
 	}
 
 	// return error if base preset does not exist
-	if !Exists(base) {
-		return fmt.Errorf("base env preset '%v' does not exist", base)
+	if !Exists(cfg, base) {
+		return &PresetDoesNotExist{preset: base, base: true}
 	}
 
 	// get src preset file handle
-	srcPresetPath := path.Join(cfg.Base(), fs.PathFromFormattedName(base))
+	srcPresetPath := path.Join(cfg.Dir(), fs.PathFromFormattedName(base))
 	srcPresetFile, err := fs.OpenFileRead(srcPresetPath)
 	if err != nil {
 		return err
 	}
 
 	// get dest preset file handle
-	destPresetPath := path.Join(cfg.Base(), fs.PathFromFormattedName(preset))
+	destPresetPath := path.Join(cfg.Dir(), fs.PathFromFormattedName(preset))
 	destPresetFile, err := fs.OpenFileWrite(destPresetPath)
 	if err != nil {
 		return err

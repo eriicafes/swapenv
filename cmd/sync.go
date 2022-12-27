@@ -22,9 +22,8 @@ This command is not required to be called as syncing is always done before chang
 		cfg := config.Get()
 
 		// commit .env contents into current preset
-		if err := presets.Commit(); err != nil {
-			cobra.CheckErr(err)
-		}
+		err := presets.Commit(cfg)
+		cobra.CheckErr(err)
 
 		fmt.Println("synced:", cfg.GetPreset(), "with .env file")
 	},

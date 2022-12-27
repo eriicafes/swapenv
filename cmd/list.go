@@ -27,7 +27,7 @@ var listCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		cfg := config.Get()
-		envs := presets.List()
+		envs := presets.List(cfg)
 
 		// list all env presets in non-interactive mode
 		if !listFlags.Interactive {
@@ -40,9 +40,8 @@ var listCmd = &cobra.Command{
 		cobra.CheckErr(err)
 
 		// swap to selected preset
-		if err = presets.Swap(preset); err != nil {
-			cobra.CheckErr(err)
-		}
+		err = presets.Swap(cfg, preset)
+		cobra.CheckErr(err)
 
 		fmt.Println("using env preset:", preset)
 	},

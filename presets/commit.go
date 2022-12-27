@@ -8,11 +8,11 @@ import (
 	"github.com/eriicafes/swapenv/fs"
 )
 
-// Commit .env file to current preset.
-func Commit() error {
-	cfg := config.Get()
-
-	// get env file handle
+// Commit commits .env file to current preset.
+//
+// An error is returned if .env file does not exist. However, the preset file will be created if it does not exist.
+func Commit(cfg config.Config) error {
+	// get .env file handle
 	envFile, err := fs.OpenFileRead(".env")
 	if err != nil {
 		return err
@@ -20,7 +20,7 @@ func Commit() error {
 	defer envFile.Close()
 
 	// get preset file handle
-	presetPath := path.Join(cfg.Base(), fs.PathFromFormattedName(cfg.GetPreset()))
+	presetPath := path.Join(cfg.Dir(), fs.PathFromFormattedName(cfg.GetPreset()))
 	presetFile, err := fs.OpenFileWrite(presetPath)
 	if err != nil {
 		return err

@@ -1,45 +1,38 @@
 package config
 
 import (
-	"errors"
 	"path"
 
 	"github.com/spf13/viper"
 )
 
-type env struct {
-	Preset string
-}
-
 type viperConfig struct {
-	env    env
-	base   string
+	wd     string
 	loaded bool
+
+	config     *viper.Viper
+	rootConfig *viper.Viper
 }
 
 func NewViperConfig(wd string) *viperConfig {
-	base := path.Join(wd, "env")
-
-	config := &viperConfig{
-		base: base,
+	vc := &viperConfig{
+		wd:         wd,
+		config:     viper.New(),
+		rootConfig: viper.New(),
 	}
 
-	config.setup()
+	vc.setupRoot()
+	vc.setup()
 
-	return config
+	return vc
 }
 
 func (vc *viperConfig) setup() {
-	// configure viper
-	viper.SetConfigName(".swapenvcache")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(vc.base)
+	// setup config
+	vc.config.SetConfigFile(path.Join(vc.Dir(), ".swapenvcache.yaml"))
 
-	// unmarshal into struct before exiting function
-	defer viper.UnmarshalKey("env", &vc.env)
-
-	// read config file
-	if err := viper.ReadInConfig(); err != nil {
+	// read from file
+	if err := vc.config.ReadInConfig(); err != nil {
 		// return early on read error
 		return
 	}
@@ -48,34 +41,44 @@ func (vc *viperConfig) setup() {
 	vc.loaded = true
 }
 
-func (vc *viperConfig) write() error {
-	if err := viper.WriteConfig(); err != nil {
-		var fnfe viper.ConfigFileNotFoundError
+func (vc *viperConfig) setupRoot() {
+	// setup root config
+	vc.rootConfig.SetConfigFile(path.Join(vc.wd, ".swapenv.yaml"))
 
-		// retry with safe write if file not found
-		if errors.As(err, &fnfe) {
-			return viper.SafeWriteConfig()
-		}
-		return err
-	}
-	return nil
+	// set default dir
+	vc.rootConfig.SetDefault("dir", DefaultWd)
+
+	// read from file
+	_ = vc.rootConfig.ReadInConfig()
 }
 
-func (vc *viperConfig) Base() string {
-	return vc.base
+func (vc *viperConfig) Dir() string {
+	dir := vc.rootConfig.GetString("dir")
+	return path.Join(vc.wd, dir)
+}
+
+func (vc *viperConfig) ChDir(dir string) error {
+	vc.rootConfig.Set("dir", dir)
+
+	// reset config
+	vc.config = viper.New()
+	vc.setup()
+
+	return vc.rootConfig.WriteConfig()
 }
 
 func (vc *viperConfig) HasInit() bool {
 	return vc.loaded
 }
 
-func (vc *viperConfig) GetPreset() string {
-	return vc.env.Preset
+func (vc *viperConfig) Flush() error {
+	return vc.config.WriteConfig()
 }
 
-func (vc *viperConfig) SetPreset(preset string) error {
-	viper.Set("env.preset", preset)
-	vc.env.Preset = preset
+func (vc *viperConfig) GetPreset() string {
+	return vc.config.GetString("env.preset")
+}
 
-	return vc.write()
+func (vc *viperConfig) SetPreset(preset string) {
+	vc.config.Set("env.preset", preset)
 }
