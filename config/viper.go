@@ -29,7 +29,7 @@ func NewViperConfig(wd string) *viperConfig {
 
 func (vc *viperConfig) setup() {
 	// setup config
-	vc.config.SetConfigFile(path.Join(vc.Dir(), ".swapenvcache.yaml"))
+	vc.config.SetConfigFile(path.Join(vc.Dir(), ConfigName))
 
 	// read from file
 	if err := vc.config.ReadInConfig(); err != nil {
@@ -43,10 +43,10 @@ func (vc *viperConfig) setup() {
 
 func (vc *viperConfig) setupRoot() {
 	// setup root config
-	vc.rootConfig.SetConfigFile(path.Join(vc.wd, ".swapenv.yaml"))
+	vc.rootConfig.SetConfigFile(path.Join(vc.wd, ConfigRootName))
 
 	// set default dir
-	vc.rootConfig.SetDefault("dir", DefaultWd)
+	vc.rootConfig.SetDefault("dir", DefaultDir)
 
 	// read from file
 	_ = vc.rootConfig.ReadInConfig()

@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/eriicafes/swapenv/config"
+	"github.com/eriicafes/swapenv/fs"
 	"github.com/eriicafes/swapenv/presets"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/afero"
@@ -59,12 +63,25 @@ var initCmd = &cobra.Command{
 		}
 		cobra.CheckErr(err)
 
-		// TODO: add env dir and .env to .gitignore if project is a git repository
+		// add .env and config dir to .gitignore if project is a git repository
+		if _, ok := config.GitRoot(); ok {
+			ignorePaths := []string{
+				".env",
+				"/" + filepath.Base(cfg.Dir()),
+				config.ConfigRootName,
+				config.ConfigName,
+			}
+			// add ignore paths to gitignore
+			err := addToGitIgnore(cfg, afs, ignorePaths)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 
 		fmt.Println("created base env preset:", ".env."+preset, "in:", cfg.Dir())
 
 		// update env preset
-		// calling this function will also create the swapenvcache config file
+		// calling this function will also create the config file
 		err = presets.UncheckedSet(cfg, preset)
 		cobra.CheckErr(err)
 	},
@@ -79,6 +96,54 @@ func copyExistingPreset(cfg config.Config, afs afero.Fs, preset string) error {
 		fmt.Printf("env preset '%s' already exists, skipping...\n", preset)
 	}
 	return nil
+}
+
+func addToGitIgnore(cfg config.Config, afs afero.Fs, paths []string) error {
+	// open .gitignore file
+	file, err := fs.Open(afs, ".gitignore", fs.FlagReadWriteAppend)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// track if .gitignore has contents
+	var hasContents bool
+
+	// filter ignore paths
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() && len(paths) > 0 { // stop once paths is empty
+		for i, path := range paths {
+			line := scanner.Text()
+			// set hasContents to true once a non empty line is read from scanner
+			if !hasContents && len(line) > 0 {
+				hasContents = true
+			}
+			if path == line {
+				paths = append(paths[:i], paths[i+1:]...) // filter out path
+			}
+		}
+	}
+	err = scanner.Err()
+	if err != nil {
+		return err
+	}
+
+	// return early if ignore paths is now empty
+	if len(paths) == 0 {
+		return nil
+	}
+
+	// write ignore paths to .gitignore
+	// append new line if .gitignore has contents
+	var content string
+	if hasContents {
+		content += "\n"
+	}
+	for _, path := range paths {
+		content += path + "\n"
+	}
+	_, err = io.WriteString(file, content)
+	return err
 }
 
 func promptContinueInit(flags *InitFlags, dir string) error {
@@ -118,7 +183,7 @@ func promptPresetName(flags *InitFlags) (string, error) {
 func init() {
 	initCmd.Flags().BoolVarP(&initFlags.Yes, "yes", "y", false, "skip initialize prompt")
 	initCmd.Flags().StringVarP(&initFlags.Preset, "preset", "p", "", "base env preset")
-	initCmd.Flags().StringVarP(&initFlags.Dir, "dir", "", "", fmt.Sprintf("swapenv config directory (default '%s')", config.DefaultWd))
+	initCmd.Flags().StringVarP(&initFlags.Dir, "dir", "", "", fmt.Sprintf("swapenv config directory (default '%s')", config.DefaultDir))
 
 	rootCmd.AddCommand(initCmd)
 }

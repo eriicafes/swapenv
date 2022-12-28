@@ -1,4 +1,4 @@
-/env
 .env
-swapenv
-swapenv.yaml
+/env
+.swapenv.yaml
+.swapenvcache.yaml

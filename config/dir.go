@@ -6,11 +6,18 @@ import (
 	"strings"
 )
 
-var DefaultWd = "env"
+// DefaultDir is swapenv default config dir.
+const DefaultDir = "env"
 
-// Getwd returns swapenv config dir.
+// ConfigName is swapenv config file name.
+const ConfigName = ".swapenvcache.yaml"
+
+// ConfigRootName is swapenv root config file name.
+const ConfigRootName = ".swapenv.yaml"
+
+// Getwd returns swapenv working dir.
 func Getwd() string {
-	if gitwd, ok := gitRoot(); ok {
+	if gitwd, ok := GitRoot(); ok {
 		return gitwd
 	}
 
@@ -19,8 +26,8 @@ func Getwd() string {
 	return wd
 }
 
-// gitRoot returns the git working dir and a boolean to show if command was successful.
-func gitRoot() (string, bool) {
+// GitRoot returns the git working dir and a boolean to show if command was successful.
+func GitRoot() (string, bool) {
 	root, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 
 	if err != nil {
