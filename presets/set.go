@@ -1,6 +1,8 @@
 package presets
 
-import "github.com/eriicafes/swapenv/config"
+import (
+	"github.com/eriicafes/swapenv/config"
+)
 
 // UncheckedSet sets preset as the current preset.
 //

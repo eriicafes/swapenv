@@ -6,6 +6,7 @@ import (
 	"github.com/eriicafes/swapenv/args"
 	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -35,9 +36,10 @@ var useCmd = &cobra.Command{
 	Args:    useArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
 		cfg := config.Get()
+		afs := afero.NewOsFs()
 
 		// swap to selected preset
-		err := presets.Swap(cfg, useArgs.Fields.Preset)
+		err := presets.Swap(cfg, afs, useArgs.Fields.Preset)
 		cobra.CheckErr(err)
 
 		fmt.Println("using env preset:", useArgs.Fields.Preset)

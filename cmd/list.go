@@ -7,6 +7,7 @@ import (
 	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
 	"github.com/manifoldco/promptui"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +28,8 @@ var listCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		cfg := config.Get()
-		envs := presets.List(cfg)
+		afs := afero.NewOsFs()
+		envs := presets.List(cfg, afs)
 
 		// list all env presets in non-interactive mode
 		if !listFlags.Interactive {
@@ -40,7 +42,7 @@ var listCmd = &cobra.Command{
 		cobra.CheckErr(err)
 
 		// swap to selected preset
-		err = presets.Swap(cfg, preset)
+		err = presets.Swap(cfg, afs, preset)
 		cobra.CheckErr(err)
 
 		fmt.Println("using env preset:", preset)

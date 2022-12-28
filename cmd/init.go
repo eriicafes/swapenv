@@ -8,6 +8,7 @@ import (
 	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
 	"github.com/manifoldco/promptui"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -30,6 +31,7 @@ var initCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		cfg := config.Get()
+		afs := afero.NewOsFs()
 
 		// change config dir if provided
 		if initFlags.Dir != "" {
@@ -49,11 +51,11 @@ var initCmd = &cobra.Command{
 
 		// create base env preset
 		// uses contents of .env file, creating it if it does not exist
-		err = presets.Create(cfg, preset)
+		err = presets.Create(cfg, afs, preset)
 		// copy over preset env file to .env if preset already exists and .env does not exist or is empty
 		var perr *presets.PresetAlreadyExists
 		if errors.As(err, &perr) {
-			err = copyExistingPreset(cfg, preset)
+			err = copyExistingPreset(cfg, afs, preset)
 		}
 		cobra.CheckErr(err)
 
@@ -68,11 +70,11 @@ var initCmd = &cobra.Command{
 	},
 }
 
-func copyExistingPreset(cfg config.Config, preset string) error {
+func copyExistingPreset(cfg config.Config, afs afero.Fs, preset string) error {
 	// if .env does not exist or is empty, load preset into .env
-	if stat, staterr := os.Stat(".env"); errors.Is(staterr, os.ErrNotExist) || stat.Size() == 0 {
+	if stat, staterr := afs.Stat(".env"); errors.Is(staterr, os.ErrNotExist) || stat.Size() == 0 {
 		fmt.Printf("env preset '%s' already exists, copying contents to .env\n", preset)
-		return presets.UncheckedLoad(cfg, preset)
+		return presets.UncheckedLoad(cfg, afs, preset)
 	} else {
 		fmt.Printf("env preset '%s' already exists, skipping...\n", preset)
 	}

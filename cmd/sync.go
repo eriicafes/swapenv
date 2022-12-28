@@ -5,6 +5,7 @@ import (
 
 	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -20,9 +21,10 @@ This command is not required to be called as syncing is always done before chang
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		cfg := config.Get()
+		afs := afero.NewOsFs()
 
 		// commit .env contents into current preset
-		err := presets.Commit(cfg)
+		err := presets.Commit(cfg, afs)
 		cobra.CheckErr(err)
 
 		fmt.Println("synced:", cfg.GetPreset(), "with .env file")

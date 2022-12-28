@@ -6,6 +6,7 @@ import (
 	"github.com/eriicafes/swapenv/args"
 	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -43,17 +44,18 @@ var createCmd = &cobra.Command{
 	Args:    createArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
 		cfg := config.Get()
+		afs := afero.NewOsFs()
 
 		// create env preset
 		if createFlags.Base != "" {
 			// create preset from base env preset
-			err := presets.CreateFrom(cfg, createArgs.Fields.Preset, createFlags.Base)
+			err := presets.CreateFrom(cfg, afs, createArgs.Fields.Preset, createFlags.Base)
 			cobra.CheckErr(err)
 
 			fmt.Println("created env preset:", createArgs.Fields.Preset, "from:", createFlags.Base)
 		} else {
 			// create preset from .env file, creating it if it does not exist
-			err := presets.Create(cfg, createArgs.Fields.Preset)
+			err := presets.Create(cfg, afs, createArgs.Fields.Preset)
 			cobra.CheckErr(err)
 
 			fmt.Println("created env preset:", createArgs.Fields.Preset)
@@ -65,7 +67,7 @@ var createCmd = &cobra.Command{
 		}
 
 		// swap to newly created preset
-		err := presets.Swap(cfg, createArgs.Fields.Preset)
+		err := presets.Swap(cfg, afs, createArgs.Fields.Preset)
 		cobra.CheckErr(err)
 
 		fmt.Println("using env preset:", createArgs.Fields.Preset)
