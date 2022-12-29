@@ -96,7 +96,7 @@ func TestListIgnoreNonEnvFiles(t *testing.T) {
 	sort.Strings(got)
 	for i, item := range got {
 		if item != expected[i] {
-			t.Fatalf("files do not match expected result, expected %s got %s", item, expected[i])
+			t.Fatalf("files do not match expected result, expected %s got %s", expected[i], item)
 		}
 	}
 }
