@@ -4,19 +4,21 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/afero"
 )
 
 // List all env files in directory and sub directories
-func List(dir string) ([]string, error) {
+func List(afs afero.Fs, dir string) ([]string, error) {
 	files := []string{}
 
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	err := afero.Walk(afs, dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// operate only on files
-		if !info.IsDir() {
+		// operate only on files with .env prefix
+		if !info.IsDir() && strings.HasPrefix(info.Name(), ".env.") {
 			// get relative path to dir
 			path, err = filepath.Rel(dir, path)
 
@@ -25,10 +27,7 @@ func List(dir string) ([]string, error) {
 				return nil
 			}
 
-			// check if file has .env. prefix
-			if strings.HasPrefix(filepath.Base(path), ".env.") {
-				files = append(files, PathToFormattedName(path))
-			}
+			files = append(files, PathToFormattedName(path))
 		}
 
 		return nil

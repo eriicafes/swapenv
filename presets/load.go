@@ -7,26 +7,30 @@ import (
 
 	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/fs"
+	"github.com/spf13/afero"
 )
 
-// Load preset to .env file.
+// UncheckedLoad loads preset to .env file.
+//
+// An error is returned if preset does not exist.
+// The current preset is updated on successful load.
 //
 // NOTE: contents of .env file will not be committed by this function. Explicitly call Commit before using this function to prevent data loss.
-func LoadUnchecked(preset string) error {
-	if !Exists(preset) {
-		return fmt.Errorf("env preset '%v' does not exist", preset)
+func UncheckedLoad(cfg config.Config, afs afero.Fs, preset string) error {
+	if !Exists(cfg, afs, preset) {
+		return fmt.Errorf("env preset '%s' does not exist", preset)
 	}
 
 	// get preset file handle
-	presetPath := path.Join(config.Base, fs.PathFromFormattedName(preset))
-	presetFile, err := fs.OpenFileRead(presetPath)
+	presetPath := path.Join(cfg.Dir(), fs.PathFromFormattedName(preset))
+	presetFile, err := fs.Open(afs, presetPath, fs.FlagRead)
 	if err != nil {
 		return err
 	}
 	defer presetFile.Close()
 
-	// get env file handle
-	envFile, err := fs.OpenFileWrite(".env")
+	// get .env file handle
+	envFile, err := fs.Open(afs, ".env", fs.FlagWrite)
 	if err != nil {
 		return err
 	}
@@ -38,10 +42,6 @@ func LoadUnchecked(preset string) error {
 		return err
 	}
 
-	// update config
-	if err := config.SetEnvPreset(preset); err != nil {
-		return err
-	}
-
-	return nil
+	// update preset
+	return UncheckedSet(cfg, preset)
 }

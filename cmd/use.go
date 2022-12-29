@@ -6,6 +6,7 @@ import (
 	"github.com/eriicafes/swapenv/args"
 	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +18,7 @@ type UseArgs struct {
 	Preset string
 }
 
-var useArgs = args.NewArgs(func(cmd *cobra.Command, rawArgs []string) (args UseArgs, err error) {
+var useArgs = args.New(func(cmd *cobra.Command, rawArgs []string) (args UseArgs, err error) {
 	// accept only preset argument
 	if err = cobra.ExactArgs(1)(cmd, rawArgs); err != nil {
 		return args, err
@@ -34,15 +35,12 @@ var useCmd = &cobra.Command{
 	Example: "swapenv use staging",
 	Args:    useArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// ensure init has been run previously
-		if err := config.EnsureHasInitialized(); err != nil {
-			cobra.CheckErr(err)
-		}
+		cfg := config.Get()
+		afs := afero.NewOsFs()
 
 		// swap to selected preset
-		if err := presets.Swap(useArgs.Fields.Preset); err != nil {
-			cobra.CheckErr(err)
-		}
+		err := presets.Swap(cfg, afs, useArgs.Fields.Preset)
+		cobra.CheckErr(err)
 
 		fmt.Println("using env preset:", useArgs.Fields.Preset)
 	},

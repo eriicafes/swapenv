@@ -6,6 +6,7 @@ import (
 	"github.com/eriicafes/swapenv/args"
 	"github.com/eriicafes/swapenv/config"
 	"github.com/eriicafes/swapenv/presets"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,7 @@ type CreateArgs struct {
 	Preset string
 }
 
-var createArgs = args.NewArgs(func(cmd *cobra.Command, rawArgs []string) (args CreateArgs, err error) {
+var createArgs = args.New(func(cmd *cobra.Command, rawArgs []string) (args CreateArgs, err error) {
 	// accept only preset argument
 	if err = cobra.ExactArgs(1)(cmd, rawArgs); err != nil {
 		return args, err
@@ -42,23 +43,23 @@ var createCmd = &cobra.Command{
 	Example: "swapenv create staging -u -b prod",
 	Args:    createArgs.Validate,
 	Run: func(cmd *cobra.Command, _ []string) {
-		// ensure init has been run previously
-		if err := config.EnsureHasInitialized(); err != nil {
-			cobra.CheckErr(err)
-		}
+		cfg := config.Get()
+		afs := afero.NewOsFs()
 
 		// create env preset
-		var err error
 		if createFlags.Base != "" {
-			// create preset from base
-			err = presets.CreateFrom(createArgs.Fields.Preset, createFlags.Base)
+			// create preset from base env preset
+			err := presets.CreateFrom(cfg, afs, createArgs.Fields.Preset, createFlags.Base)
+			cobra.CheckErr(err)
+
+			fmt.Println("created env preset:", createArgs.Fields.Preset, "from:", createFlags.Base)
 		} else {
 			// create preset from .env file, creating it if it does not exist
-			err = presets.Create(createArgs.Fields.Preset)
-		}
-		cobra.CheckErr(err)
+			err := presets.Create(cfg, afs, createArgs.Fields.Preset)
+			cobra.CheckErr(err)
 
-		fmt.Println("created env preset:", createArgs.Fields.Preset, "from:", createFlags.Base)
+			fmt.Println("created env preset:", createArgs.Fields.Preset)
+		}
 
 		// proceed to use preset if use flag was provided
 		if !createFlags.Use {
@@ -66,16 +67,15 @@ var createCmd = &cobra.Command{
 		}
 
 		// swap to newly created preset
-		if err = presets.Swap(createArgs.Fields.Preset); err != nil {
-			cobra.CheckErr(err)
-		}
+		err := presets.Swap(cfg, afs, createArgs.Fields.Preset)
+		cobra.CheckErr(err)
 
 		fmt.Println("using env preset:", createArgs.Fields.Preset)
 	},
 }
 
 func init() {
-	createCmd.Flags().StringVarP(&createFlags.Base, "base", "b", "", "optional env preset to base env file")
+	createCmd.Flags().StringVarP(&createFlags.Base, "base", "b", "", "optional base env preset")
 	createCmd.Flags().BoolVarP(&createFlags.Use, "use", "u", false, "use created env preset")
 
 	rootCmd.AddCommand(createCmd)

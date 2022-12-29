@@ -7,6 +7,13 @@ type args[T any] struct {
 	Fields    T
 }
 
+// Create new args object with fields and validator
+func New[T any](validator func(cmd *cobra.Command, rawArgs []string) (T, error)) args[T] {
+	return args[T]{
+		validator: validator,
+	}
+}
+
 // Cobra Positional Args function
 func (a *args[T]) Validate(cmd *cobra.Command, rawArgs []string) error {
 	fields, err := a.validator(cmd, rawArgs)
@@ -15,14 +22,7 @@ func (a *args[T]) Validate(cmd *cobra.Command, rawArgs []string) error {
 		return err
 	}
 
-	// mutate internal fields after successful validation
+	// mutate fields after successful validation
 	a.Fields = fields
 	return nil
-}
-
-// Create new args object with fields and validator
-func NewArgs[T any](validator func(cmd *cobra.Command, rawArgs []string) (T, error)) args[T] {
-	return args[T]{
-		validator: validator,
-	}
 }

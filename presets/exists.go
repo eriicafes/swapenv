@@ -2,12 +2,12 @@ package presets
 
 import (
 	"github.com/eriicafes/swapenv/config"
-	"github.com/eriicafes/swapenv/fs"
+	"github.com/spf13/afero"
 )
 
-// Check if preset exists.
-func Exists(preset string) bool {
-	files, _ := fs.List(config.Base)
+// Exists checks if preset exists.
+func Exists(cfg config.Config, afs afero.Fs, preset string) bool {
+	files := List(cfg, afs)
 
 	for _, file := range files {
 		if file == preset {
