@@ -120,3 +120,17 @@ swapenv rm dev
 # remove multiple envs
 swapenv rm prod staging
 ```
+
+## Update / Uninstall
+
+To update `swapenv`, reinstall it using `go install`, which will override the existing binary:
+
+```sh
+go install github.com/eriicafes/swapenv@latest
+```
+
+To remove swapenv, delete the installed binary:
+
+```sh
+rm $(which swapenv)
+```
