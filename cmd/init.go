@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/eriicafes/swapenv/config"
@@ -31,6 +32,10 @@ var initCmd = &cobra.Command{
 
 		// install post checkout hook
 		err = env.InstallHook(fsys, filepath.Dir(envsdir))
+		exitOnError(err)
+
+		// install git alias
+		err = exec.Command("git", "config", "alias.env", "!sh -c 'swapenv \"$@\"' --").Run()
 		exitOnError(err)
 
 		// set branch as current env
