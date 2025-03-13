@@ -29,7 +29,6 @@ var rootCmd = &cobra.Command{
 	CompletionOptions: cobra.CompletionOptions{
 		HiddenDefaultCmd: true,
 	},
-	Version: "1.0.0",
 }
 
 func exitOnError(err error) {
@@ -39,7 +38,8 @@ func exitOnError(err error) {
 	}
 }
 
-func Execute() {
+func Execute(version string) {
+	rootCmd.Version = version
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
