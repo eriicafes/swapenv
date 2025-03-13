@@ -30,7 +30,7 @@ var createFlags struct {
 
 var createCmd = &cobra.Command{
 	Use:     "create env",
-	Short:   "Create new env preset",
+	Short:   "Create new env",
 	Example: "swapenv create prod -u -b=staging",
 	Args:    createArgs.Validate,
 	Run: createArgs.Run(func(cmd *cobra.Command, args CreateArgs) {

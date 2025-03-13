@@ -26,7 +26,7 @@ var listCmd = &cobra.Command{
 		current, _ := config.GetEnv()
 
 		envs := env.List(fsys, envsdir)
-		// list all env presets in non-interactive mode
+		// list all envs in non-interactive mode
 		if !listFlags.Interactive {
 			for _, e := range envs {
 				if e == current {
