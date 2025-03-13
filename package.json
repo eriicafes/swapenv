@@ -1,14 +1,11 @@
 {
   "name": "swapenv",
-  "version": "1.0.0",
-  "description": "Build a command line application with Go Cobra",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "version": "1.0.1",
+  "private": true,
+  "scripts": {},
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Eric Afes <eriicafes@gmail.com>",
+  "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.28.1"
   }
