@@ -2,86 +2,63 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/eriicafes/swapenv/config"
-	"github.com/eriicafes/swapenv/presets"
+	"github.com/eriicafes/swapenv/env"
+	"github.com/eriicafes/wfs"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
-// List all env presets
-// eg. `swapenv ls -i`
-
-type ListFlags struct {
+var listFlags struct {
 	Interactive bool
 }
-
-var listFlags ListFlags
 
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
-	Short:   "List all env presets",
+	Short:   "List all envs",
 	Example: "swapenv ls -i",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
-		cfg := config.Get()
-		afs := afero.NewOsFs()
-		envs := presets.List(cfg, afs)
+		fsys := wfs.OS()
+		_, envsdir := config.Dir()
+		current, _ := config.GetEnv()
 
+		envs := env.List(fsys, envsdir)
 		// list all env presets in non-interactive mode
 		if !listFlags.Interactive {
-			listEnvs(envs, cfg.GetPreset())
+			for _, e := range envs {
+				if e == current {
+					fmt.Println("\033[36m" + "* " + e + "\033[0m")
+				} else {
+					fmt.Println("  " + e)
+				}
+			}
 			return
 		}
 
 		// select env with prompt
-		preset, err := promptSelectEnv(envs)
-		cobra.CheckErr(err)
+		prompt := promptui.Select{
+			Label: "Select env to use",
+			Items: envs,
+			Size:  10,
+		}
+		_, val, err := prompt.Run()
+		exitOnError(err)
+		if val == current {
+			return
+		}
 
-		// swap to selected preset
-		err = presets.Swap(cfg, afs, preset)
-		cobra.CheckErr(err)
+		detachedMsg, err := UseEnv(val)
+		exitOnError(err)
 
-		fmt.Println("using env preset:", preset)
+		fmt.Printf("Using%s env '%s'\n", detachedMsg, val)
 	},
 }
 
-func coloured(s string) string {
-	return "\033[36m" + s + "\033[0m"
-}
-
-func listEnvs(envs []string, preset string) {
-	fenvs := make([]string, 0, len(envs))
-
-	for _, env := range envs {
-		if env == preset {
-			env = coloured("* " + env)
-		} else {
-			env = "  " + env
-		}
-		fenvs = append(fenvs, env)
-	}
-
-	fmt.Println(strings.Join(fenvs, "\n"))
-}
-
-func promptSelectEnv(envs []string) (string, error) {
-	prompt := promptui.Select{
-		Label: "Choose env preset to load",
-		Items: envs,
-		Size:  10,
-	}
-
-	_, env, err := prompt.Run()
-
-	return env, err
-}
-
 func init() {
-	listCmd.Flags().BoolVarP(&listFlags.Interactive, "interactive", "i", false, "list presets in interactive mode")
+	listCmd.Flags().BoolVarP(&listFlags.Interactive, "interactive", "i", false, "list envs in interactive mode")
 
 	rootCmd.AddCommand(listCmd)
 }

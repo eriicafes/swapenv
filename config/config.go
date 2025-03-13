@@ -1,28 +1,41 @@
 package config
 
 import (
-	"errors"
+	"path"
+	"path/filepath"
+
+	"github.com/spf13/viper"
 )
 
-var cfg = NewViperConfig(Getwd())
+var _wdir, _envsdir string
+var _loaded bool
 
-// Get returns a pointer to the config singleton.
-func Get() Config {
-	return cfg
+// Loaded returns true if config has been loaded.
+func Loaded() bool { return _loaded }
+
+// Dir returns the git project directory "." and envs directory ".git/envs".
+func Dir() (wdir, envsdir string) { return _wdir, _envsdir }
+
+// Get returns the current and previous env.
+func GetEnv() (current, prev string) {
+	return viper.GetString("branch.current"), viper.GetString("branch.prev")
 }
 
-// EnsureHasInit checks if config has been initialized.
-func EnsureHasInit(c Config) error {
-	if c.HasInit() {
-		return nil
+// Set changes the current env.
+func SetEnv(env string) error {
+	current := viper.GetString("branch.current")
+	if current == "" {
+		current = env
 	}
-	return errors.New("swapenv has not been initialized on this project, run `swapenv init`")
+	viper.Set("branch.prev", current)
+	viper.Set("branch.current", env)
+	return viper.WriteConfig()
 }
 
-// EnsureHasNotInit checks if config has not been initialized.
-func EnsureHasNotInit(c Config) error {
-	if c.HasInit() {
-		return errors.New("swapenv has already been initialized on this project")
+func init() {
+	if gdir, err := GitDir(); err == nil {
+		_wdir, _envsdir = filepath.Dir(gdir), path.Join(gdir, "envs")
+		viper.SetConfigFile(path.Join(_envsdir, ".swapenv.yaml"))
+		_loaded = viper.ReadInConfig() == nil
 	}
-	return nil
 }
